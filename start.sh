@@ -6,9 +6,9 @@ if [ -z "$DEPLOYER_USERNAME" ]; then
   exit 1
 fi
 
-# Create user if it doesn't exist
+# Create user if it doesn’t exist
 if ! id "$DEPLOYER_USERNAME" &>/dev/null; then
-  adduser -D "$DEPLOYER_USERNAME"
+  adduser --disabled-password --gecos "" "$DEPLOYER_USERNAME"
   mkdir -p "/home/$DEPLOYER_USERNAME/web"
   chown "$DEPLOYER_USERNAME:$DEPLOYER_USERNAME" "/home/$DEPLOYER_USERNAME/web"
   chmod 755 "/home/$DEPLOYER_USERNAME/web"
