@@ -1,0 +1,29 @@
+#!/bin/sh
+
+# Check if DEPLOYER_USERNAME is set
+if [ -z "$DEPLOYER_USERNAME" ]; then
+  echo "Error: DEPLOYER_USERNAME environment variable is not set."
+  exit 1
+fi
+
+# Create user if it doesn't exist
+if ! id "$DEPLOYER_USERNAME" &>/dev/null; then
+  adduser -D "$DEPLOYER_USERNAME"
+  mkdir -p "/home/$DEPLOYER_USERNAME/web"
+  chown "$DEPLOYER_USERNAME:$DEPLOYER_USERNAME" "/home/$DEPLOYER_USERNAME/web"
+  chmod 755 "/home/$DEPLOYER_USERNAME/web"
+fi
+
+# Set password if DEPLOYER_PASSWORD is provided
+if [ -n "$DEPLOYER_PASSWORD" ]; then
+  echo "$DEPLOYER_USERNAME:$DEPLOYER_PASSWORD" | chpasswd
+fi
+
+# Update Nginx configuration to serve from /home/$DEPLOYER_USERNAME/web
+sed -i "s|root /usr/share/nginx/html;|root /home/$DEPLOYER_USERNAME/web;|" /etc/nginx/conf.d/default.conf
+
+# Start SSH service in the background
+/usr/sbin/sshd
+
+# Start Nginx in the foreground
+nginx -g 'daemon off;'
