@@ -11,6 +11,8 @@ RUN echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
 RUN ssh-keygen -A
 
 # Create Nginx configuration with only the server block
+RUN mkdir -p /data/www
+RUN mkdir -p /data/images
 RUN echo 'server { \
         listen 80; \
         location / { \
