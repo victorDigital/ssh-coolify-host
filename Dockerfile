@@ -12,7 +12,10 @@ RUN ssh-keygen -A
 
 # Set up a basic Nginx configuration
 RUN rm -f /etc/nginx/conf.d/default.conf
-RUN echo 'server { listen 80; root /usr/share/nginx/html; index index.html; }' > /etc/nginx/conf.d/default.conf
+
+# Get form environment variable
+ENV DEPLOYER_USERNAME=${DEPLOYER_USERNAME}
+RUN echo 'server { listen 80; root /home/'${DEPLOYER_USERNAME}'/web; index index.html; }' > /etc/nginx/conf.d/default.conf
 
 # Copy the startup script
 COPY start.sh /start.sh
