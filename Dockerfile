@@ -15,11 +15,17 @@ RUN mkdir -p /data/www
 RUN mkdir -p /data/images
 RUN echo 'server { \
         listen 80; \
+        server_name _; \
+        \
         location / { \
             root /data/www; \
+            index index.html index.htm; \
+            try_files $uri $uri/ =404; \
         } \
+        \
         location /images/ { \
             root /data; \
+            autoindex on; \
         } \
     }' > /etc/nginx/conf.d/default.conf
 
