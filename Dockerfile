@@ -10,9 +10,8 @@ RUN echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
 # Generate SSH host keys
 RUN ssh-keygen -A
 
-# Create Nginx configuration with http and server blocks
-RUN echo 'http { \
-    server { \
+# Create Nginx configuration with only the server block
+RUN echo 'server { \
         listen 80; \
         location / { \
             root /data/www; \
@@ -20,8 +19,7 @@ RUN echo 'http { \
         location /images/ { \
             root /data; \
         } \
-    } \
-}' > /etc/nginx/conf.d/default.conf
+    }' > /etc/nginx/conf.d/default.conf
 
 # Copy the startup script
 COPY start.sh /start.sh
