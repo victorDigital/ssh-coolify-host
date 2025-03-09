@@ -13,8 +13,13 @@ RUN ssh-keygen -A
 # Create Nginx configuration with only the server block
 RUN mkdir -p /data/www
 RUN mkdir -p /data/images
+
+# Remove default nginx configuration
+RUN rm -f /etc/nginx/sites-enabled/default
+
+# Create our custom configuration
 RUN echo 'server { \
-        listen 80; \
+        listen 80 default_server; \
         server_name _; \
         \
         location / { \
@@ -28,6 +33,17 @@ RUN echo 'server { \
             autoindex on; \
         } \
     }' > /etc/nginx/conf.d/default.conf
+
+# Create a sample index.html file to verify configuration
+RUN echo '<!DOCTYPE html>\
+<html>\
+<head>\
+    <title>My Custom Nginx Page</title>\
+</head>\
+<body>\
+    <h1>Success! The custom nginx configuration is working.</h1>\
+</body>\
+</html>' > /data/www/index.html
 
 # Copy the startup script
 COPY start.sh /start.sh

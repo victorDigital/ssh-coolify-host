@@ -6,22 +6,26 @@ if [ -z "$DEPLOYER_USERNAME" ]; then
   exit 1
 fi
 
-# Create user if it doesn’t exist
+# Create user if it doesn't exist
 if ! id "$DEPLOYER_USERNAME" &>/dev/null; then
   adduser --disabled-password --gecos "" "$DEPLOYER_USERNAME"
 fi
 
-# Create web directory if it doesn’t exist
+# Create web directory if it doesn't exist
 if [ ! -d "/home/$DEPLOYER_USERNAME/web" ]; then
   mkdir -p "/home/$DEPLOYER_USERNAME/web"
   chown "$DEPLOYER_USERNAME:$DEPLOYER_USERNAME" "/home/$DEPLOYER_USERNAME/web"
   chmod 755 "/home/$DEPLOYER_USERNAME/web"
 fi
 
-# Create symbolic link between user's web dir and /data/www
-ln -sf "/home/$DEPLOYER_USERNAME/web/"* /data/www/
+# Set up data/www directory for deployment
 chown -R "$DEPLOYER_USERNAME:$DEPLOYER_USERNAME" /data/www
 chmod -R 755 /data/www
+
+# Copy files from user's web directory if exists and not empty
+if [ -d "/home/$DEPLOYER_USERNAME/web" ] && [ "$(ls -A /home/$DEPLOYER_USERNAME/web)" ]; then
+  cp -rf "/home/$DEPLOYER_USERNAME/web/"* /data/www/
+fi
 
 # Set password if DEPLOYER_PASSWORD is provided (optional)
 if [ -n "$DEPLOYER_PASSWORD" ]; then
@@ -37,6 +41,9 @@ mkdir -p /run/sshd
 
 # Start SSH service in the background
 /usr/sbin/sshd
+
+# Make sure nginx configuration is correct before starting
+nginx -t
 
 # Start Nginx in the foreground
 nginx -g 'daemon off;'
