@@ -9,6 +9,10 @@ fi
 # Create user if it doesn’t exist
 if ! id "$DEPLOYER_USERNAME" &>/dev/null; then
   adduser --disabled-password --gecos "" "$DEPLOYER_USERNAME"
+fi
+
+# Create web directory if it doesn’t exist
+if [ ! -d "/home/$DEPLOYER_USERNAME/web" ]; then
   mkdir -p "/home/$DEPLOYER_USERNAME/web"
   chown "$DEPLOYER_USERNAME:$DEPLOYER_USERNAME" "/home/$DEPLOYER_USERNAME/web"
   chmod 755 "/home/$DEPLOYER_USERNAME/web"
@@ -18,7 +22,6 @@ fi
 if [ -n "$DEPLOYER_PASSWORD" ]; then
   echo "$DEPLOYER_USERNAME:$DEPLOYER_PASSWORD" | chpasswd
 fi
-
 
 # Update Nginx configuration to serve from /home/$DEPLOYER_USERNAME/web
 sed -i "s|root /usr/share/nginx/html;|root /home/$DEPLOYER_USERNAME/web;|" /etc/nginx/conf.d/default.conf
