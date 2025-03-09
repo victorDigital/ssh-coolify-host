@@ -1,6 +1,6 @@
 FROM ubuntu:latest
 
-# Install necessary packages, including sudo
+# Install necessary packages
 RUN apt-get update && apt-get install -y nginx openssh-server sudo
 
 # Configure SSH for password authentication only
@@ -10,13 +10,17 @@ RUN echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
 # Generate SSH host keys
 RUN ssh-keygen -A
 
-# Set up a basic Nginx configuration
-RUN rm -f /etc/nginx/conf.d/default.conf
-RUN echo 'server { \
-  listen 80; \
-  root /home/far/web; \
-  autoindex on; \
-  index index.html; \
+# Create Nginx configuration with http and server blocks
+RUN echo 'http { \
+    server { \
+        listen 80; \
+        location / { \
+            root /data/www; \
+        } \
+        location /images/ { \
+            root /data; \
+        } \
+    } \
 }' > /etc/nginx/conf.d/default.conf
 
 # Copy the startup script
