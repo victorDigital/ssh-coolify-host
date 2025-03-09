@@ -19,12 +19,28 @@ if [ ! -d "/home/$DEPLOYER_USERNAME/web" ]; then
 fi
 
 # Set up data/www directory for deployment
-chown -R "$DEPLOYER_USERNAME:$DEPLOYER_USERNAME" /data/www
+chown -R www-data:www-data /data/www
 chmod -R 755 /data/www
 
 # Copy files from user's web directory if exists and not empty
 if [ -d "/home/$DEPLOYER_USERNAME/web" ] && [ "$(ls -A /home/$DEPLOYER_USERNAME/web)" ]; then
   cp -rf "/home/$DEPLOYER_USERNAME/web/"* /data/www/
+  chown -R www-data:www-data /data/www
+fi
+
+# Double check and create a simple index.html if none exists
+if [ ! -f "/data/www/index.html" ]; then
+  echo '<!DOCTYPE html>
+<html>
+<head>
+    <title>My Nginx Page</title>
+</head>
+<body>
+    <h1>Success! The custom nginx configuration is working.</h1>
+    <p>This is a fallback page created by start.sh</p>
+</body>
+</html>' > /data/www/index.html
+  chown www-data:www-data /data/www/index.html
 fi
 
 # Set password if DEPLOYER_PASSWORD is provided (optional)
@@ -42,8 +58,10 @@ mkdir -p /run/sshd
 # Start SSH service in the background
 /usr/sbin/sshd
 
-# Make sure nginx configuration is correct before starting
+# Test Nginx configuration and log any errors
+echo "Testing Nginx configuration..."
 nginx -t
 
 # Start Nginx in the foreground
+echo "Starting Nginx..."
 nginx -g 'daemon off;'
