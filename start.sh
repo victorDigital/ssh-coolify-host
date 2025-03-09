@@ -19,8 +19,12 @@ if [ -n "$DEPLOYER_PASSWORD" ]; then
   echo "$DEPLOYER_USERNAME:$DEPLOYER_PASSWORD" | chpasswd
 fi
 
+
 # Update Nginx configuration to serve from /home/$DEPLOYER_USERNAME/web
 sed -i "s|root /usr/share/nginx/html;|root /home/$DEPLOYER_USERNAME/web;|" /etc/nginx/conf.d/default.conf
+
+# Create privilege separation directory for SSH
+mkdir -p /run/sshd
 
 # Start SSH service in the background
 /usr/sbin/sshd
